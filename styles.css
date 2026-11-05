@@ -45,6 +45,4 @@ tbody tr:hover { background: #f5faf8; }
 
 /* Báo cáo Excel / CSV */
 .export-menu{min-width:256px;max-height:min(70vh,560px);overflow-y:auto}
-.export-group-label{padding:12px 10px 7px;color:#6f8591;font-weight:750;letter-spacing:.65px;font-size:10px}
-.export-group-label.csv-group{margin-top:7px;border-top:1px solid var(--line)}
 .export-menu button{font-size:12px;padding:9px 12px}
