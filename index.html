@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f6f8fa"><meta name="description" content="NurseCall Cloud — báo cáo hiệu suất gọi y tá và giám sát kết nối">
+<title>NurseCall · Cloud Analytics</title><link rel="stylesheet" href="./styles.css"><link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22><rect width=%2264%22 height=%2264%22 rx=%2214%22 fill=%22%230b766e%22/><path d=%22M19 32h26M32 19v26%22 stroke=%22white%22 stroke-width=%228%22 stroke-linecap=%22round%22/></svg>"></head>
+<body>
+<div class="login" id="loginScreen" hidden>
+  <div class="login-card">
+    <div class="logo-badge">+</div>
+    <div class="login-brand">NURSECALL <span>CLOUD</span></div>
+    <h1>Đăng nhập</h1>
+    <p>Hệ thống báo cáo và giám sát</p>
+    <form id="authForm">
+      <label for="authEmail">Email</label><input id="authEmail" type="email" autocomplete="username" required placeholder="email@example.com">
+      <label for="authPassword">Mật khẩu</label><input id="authPassword" type="password" autocomplete="current-password" minlength="6" required placeholder="••••••••">
+      <div class="auth-alert" id="authError" hidden></div>
+      <button class="btn primary block" type="submit" id="loginButton">Đăng nhập</button>
+    </form>
+    <button id="signupButton" type="button" class="plain-link">Tạo tài khoản Supabase</button>
+  </div>
+</div>
+<div class="shell" id="shell" hidden>
+  <aside class="sidebar">
+    <div class="brand"><span class="brand-mark">+</span><span>NURSECALL <small>CLOUD</small></span></div>
+    <div class="navlabel">PHÂN TÍCH</div>
+    <a class="nav active" href="#overview"><span class="nav-icon">▦</span> Tổng quan</a>
+    <a class="nav" href="#beds"><span class="nav-icon">▤</span> Theo giường</a>
+    <a class="nav" href="#vitals"><span class="nav-icon">◉</span> Chỉ số bất thường</a>
+    <a class="nav" href="#devices"><span class="nav-icon">⌁</span> Kết nối thiết bị</a>
+    <div class="aside-foot"><span class="aside-dot"></span><span id="asideStatus">Đang kiểm tra</span></div>
+  </aside>
+  <main class="main">
+    <header class="topbar">
+      <div class="heading"><div class="eyebrow">NURSECALL / BÁO CÁO</div><h1>Phân tích hệ thống</h1><div class="subtitle" id="dateLabel">Dữ liệu đồng bộ từ Supabase</div></div>
+      <div class="top-actions">
+        <div class="live-status" id="liveStatus"><span class="pulse"></span><span id="liveText">Đang kết nối</span></div>
+        <select id="daysSelect" aria-label="Khoảng thời gian"><option value="7">7 ngày</option><option value="30" selected>30 ngày</option><option value="90">90 ngày</option><option value="365">12 tháng</option></select>
+        <div class="export-wrap"><button class="btn secondary" id="exportToggle" aria-expanded="false">Xuất CSV <span>⌄</span></button><div class="export-menu" id="exportMenu" hidden>
+          <button data-export="beds">Thống kê theo giường</button>
+          <button data-export="abnormal">Chỉ số bất thường</button>
+          <button data-export="outages">Thời gian gián đoạn</button>
+          <button data-export="calls">Chi tiết cuộc gọi</button>
+        </div></div>
+        <button class="icon-button" id="refreshButton" title="Cập nhật dữ liệu">↻</button>
+      </div>
+    </header>
+    <div class="content">
+      <div class="notice" id="notice" hidden></div>
+      <section id="overview">
+        <div class="section-bar"><h2>Tổng quan</h2><span class="section-meta" id="lastSync">—</span></div>
+        <div class="stat-grid">
+          <article class="stat"><div class="stat-head"><span>Tổng cuộc gọi</span><span class="stat-icon neutral">▤</span></div><strong id="kCalls">—</strong><div class="stat-sub" id="kCallsSub">Trong kỳ báo cáo</div></article>
+          <article class="stat"><div class="stat-head"><span>Cuộc gọi khẩn cấp</span><span class="stat-icon danger">!</span></div><strong id="kEmergency">—</strong><div class="stat-sub" id="kEmergencySub">—</div></article>
+          <article class="stat"><div class="stat-head"><span>Mẫu chỉ số bất thường</span><span class="stat-icon amber">●</span></div><strong id="kAbnormal">—</strong><div class="stat-sub" id="kAbnormalSub">—</div></article>
+          <article class="stat"><div class="stat-head"><span>Hoàn thành</span><span class="stat-icon good">✓</span></div><strong id="kCompleted">—</strong><div class="stat-sub" id="kCompletedSub">—</div></article>
+        </div>
+      </section>
+      <section id="devices">
+        <div class="section-bar"><h2>Kết nối thiết bị</h2><span class="section-meta">Heartbeat · Pi 60s / Node 90s</span></div>
+        <div class="connections">
+          <div class="pi-panel"><div class="device-label"><span class="device-logo">▣</span> MÁY CHỦ RASPBERRY PI 4</div><div class="pi-main"><div class="status-dot" id="piDot"></div><strong id="piState">Chưa có dữ liệu</strong></div><div class="device-details"><span>Lần cuối nhận: <b id="piLast">—</b></span><span>Gián đoạn trong kỳ: <b id="piLost">—</b></span></div></div>
+          <div class="node-panel"><div class="node-stat"><span class="node-bullet online"></span><strong id="nodeOnline">—</strong><small>Đang kết nối</small></div><div class="node-stat"><span class="node-bullet offline"></span><strong id="nodeOffline">—</strong><small>Mất kết nối</small></div><div class="node-stat"><span class="node-bullet unknown"></span><strong id="nodeUnknown">—</strong><small>Chưa xác định</small></div></div>
+        </div>
+      </section>
+      <section id="beds"><div class="section-bar"><h2>Thống kê theo giường</h2><div class="search"><span>⌕</span><input id="bedSearch" placeholder="Tìm phòng, giường" aria-label="Tìm phòng hoặc giường"></div></div>
+        <div class="table-card"><div class="scroll-table"><table><thead><tr><th>VỊ TRÍ</th><th>CUỘC GỌI</th><th>KHẨN CẤP</th><th>MẪU BẤT THƯỜNG</th><th>TIẾP NHẬN TB</th><th>GIÁN ĐOẠN</th><th>KẾT NỐI</th><th></th></tr></thead><tbody id="bedRows"><tr><td colspan="8" class="empty">Đang tải dữ liệu...</td></tr></tbody></table></div><div class="table-footer"><span id="bedCount">—</span><span>Nhấn vào giường để xem chi tiết</span></div></div>
+      </section>
+      <div class="two-col">
+        <section id="vitals" class="panel"><div class="section-bar"><h2>Chỉ số bất thường</h2><span class="section-meta">Mẫu mô phỏng</span></div>
+          <div class="metric-list">
+            <div class="metric-item"><div class="metric-row"><span>Nhịp tim</span><strong id="countHr">—</strong></div><div class="track"><span id="barHr"></span></div></div>
+            <div class="metric-item"><div class="metric-row"><span>Nhiệt độ</span><strong id="countTemp">—</strong></div><div class="track"><span id="barTemp"></span></div></div>
+            <div class="metric-item"><div class="metric-row"><span>Huyết áp</span><strong id="countBp">—</strong></div><div class="track"><span id="barBp"></span></div></div>
+            <div class="metric-item"><div class="metric-row"><span>Chế độ bất thường</span><strong id="countMode">—</strong></div><div class="track"><span id="barMode"></span></div></div>
+          </div>
+          <div class="mini-caption">Theo ngưỡng mô phỏng · Một mẫu có thể vượt nhiều ngưỡng</div>
+        </section>
+        <section class="panel"><div class="section-bar"><h2>Mẫu bất thường gần đây</h2><span class="section-meta" id="abnormalCount">—</span></div>
+          <div id="abnormalList" class="event-list"><div class="empty">Chưa có dữ liệu</div></div>
+        </section>
+      </div>
+      <section class="outage-section"><div class="section-bar"><h2>Lịch sử gián đoạn</h2><span class="section-meta" id="outageCount">—</span></div>
+        <div class="table-card"><div class="scroll-table"><table><thead><tr><th>THIẾT BỊ</th><th>BẮT ĐẦU</th><th>KHÔI PHỤC</th><th>THỜI LƯỢNG</th><th>GHI NHẬN</th></tr></thead><tbody id="outageRows"><tr><td colspan="5" class="empty">Chưa có dữ liệu</td></tr></tbody></table></div></div>
+      </section>
+      <footer class="footer"><span>© NURSECALL CLOUD</span><span id="footerSync">—</span><button id="signoutButton" class="logout">Đăng xuất</button></footer>
+    </div>
+  </main>
+</div>
+<div class="modal-cover" id="bedModal" hidden><div class="modal"><div class="modal-top"><div><small>CHI TIẾT GIƯỜNG</small><h2 id="detailTitle">—</h2></div><button id="closeModal" class="icon-button" aria-label="Đóng">×</button></div><div id="detailBody"></div></div></div>
+<div class="toast" id="toast" hidden></div>
+<script src="./app.js" defer></script></body></html>
