@@ -2,3 +2,155 @@
 @media(max-width:1150px){.sidebar{width:202px}.topbar{padding:25px}.content{padding:25px}.stat-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:760px){.sidebar{display:none}.topbar{padding:22px 17px 16px;display:block}.heading h1{font-size:22px}.top-actions{margin-top:17px}.content{padding:19px 14px}.stat-grid{gap:10px}.stat{min-height:129px;padding:16px}.stat strong{font-size:28px}.stat-head{font-size:10px}.connections,.two-col{grid-template-columns:1fr}.stat-sub{font-size:10px}.section-bar h2{font-size:14px}.search input{min-width:0;width:120px}.section-meta{font-size:10px}.node-panel{min-height:125px}.footer{flex-wrap:wrap}.table-footer span:last-child{display:none}.live-status{padding:8px}.top-actions select,.btn{padding:8px}.top-actions{gap:7px}.modal{padding:19px}}
 @media(max-width:365px){.stat-grid{grid-template-columns:1fr}.top-actions{align-items:stretch}.top-actions .live-status{flex:1}}
+
+/* NURSECALL CLOUD - MINIMAL UI */
+
+/* Loai bo chu thich va nhan trang tri */
+.eyebrow,
+.subtitle,
+.navlabel,
+.stat-sub,
+.mini-caption,
+.login-card > p,
+.modal-top small,
+.table-footer span:last-child,
+.footer > span:first-child,
+#devices > .section-bar > .section-meta {
+  display: none !important;
+}
+
+/* Giao dien chung */
+:root {
+  --paper: #f7f9fb;
+  --white: #ffffff;
+  --ink: #1b2935;
+  --muted: #778895;
+  --line: #e5ebef;
+  --sidebar: #172633;
+  --shadow: none;
+}
+
+.topbar {
+  padding: 24px 32px;
+  background: #fff;
+}
+
+.heading h1 {
+  font-size: 23px;
+  font-weight: 750;
+  letter-spacing: -0.5px;
+}
+
+.content {
+  max-width: 1500px;
+  padding: 26px 32px;
+}
+
+.content section {
+  margin-bottom: 24px;
+}
+
+/* Thanh dieu huong */
+.sidebar {
+  padding-top: 28px;
+}
+
+.brand {
+  padding-bottom: 34px;
+}
+
+.nav {
+  border-radius: 7px;
+  font-size: 13px;
+}
+
+/* The thong ke */
+.stat {
+  min-height: 116px;
+  padding: 19px 20px;
+}
+
+.stat-head {
+  font-size: 12px;
+}
+
+.stat strong {
+  margin-top: 13px;
+  font-size: 34px;
+}
+
+/* Khu vuc du lieu */
+.stat,
+.pi-panel,
+.node-panel,
+.panel,
+.table-card {
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  box-shadow: none;
+}
+
+.section-bar h2 {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.panel {
+  min-height: 0;
+}
+
+th {
+  background: #fafbfd;
+  color: #70808c;
+}
+
+td {
+  color: #344756;
+}
+
+tbody tr:hover {
+  background: #f5faf8;
+}
+
+/* Nut va bo loc */
+.btn,
+.icon-button,
+.top-actions select,
+.search input {
+  border-radius: 7px;
+}
+
+.btn.primary {
+  background: #087b6c;
+  color: #fff;
+}
+
+/* Chan trang */
+.footer {
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+/* Giao dien dien thoai */
+@media (max-width: 760px) {
+  .topbar {
+    padding: 18px 16px;
+  }
+
+  .content {
+    padding: 18px 14px;
+  }
+
+  .heading h1 {
+    font-size: 21px;
+  }
+
+  .stat {
+    padding: 16px;
+    min-height: 105px;
+  }
+
+  .stat strong {
+    font-size: 28px;
+  }
+}
