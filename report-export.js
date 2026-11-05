@@ -11,7 +11,7 @@
   const NUMERIC_FIELDS = new Set([
     'total_calls', 'emergency_calls', 'completed_calls',
     'avg_accept_seconds', 'total_samples', 'abnormal_samples',
-    'silence_minutes', 'bpm', 'temp_c', 'bp_sys', 'bp_dia', 'minutes',
+    'bpm', 'temp_c', 'bp_sys', 'bp_dia',
     'accept_seconds', 'completion_rate'
   ]);
   const FLAG_FIELDS = new Set(['hr_alert', 'temp_alert', 'bp_alert', 'mode_alert']);
@@ -30,7 +30,7 @@
         ['avg_accept_seconds', 'Tiếp nhận TB (giây)', 21],
         ['total_samples', 'Tổng mẫu đo', 16],
         ['abnormal_samples', 'Mẫu bất thường', 19],
-        ['silence_minutes', 'Gián đoạn (phút)', 20],
+        ['silence_minutes', 'Gián đoạn', 24],
         ['node_status', 'Trạng thái node', 22],
         ['last_seen_at', 'Lần nhận tín hiệu cuối', 24]
       ]
@@ -55,7 +55,7 @@
       columns: [
         ['device_id', 'Thiết bị', 28], ['kind', 'Loại thiết bị', 18],
         ['started_at', 'Bắt đầu', 23], ['ended_at', 'Khôi phục', 23],
-        ['minutes', 'Thời lượng (phút)', 22],
+        ['minutes', 'Thời lượng', 24],
         ['outage_state', 'Tình trạng', 22]
       ]
     },
@@ -98,7 +98,19 @@
     }).format(dt);
   }
 
+  function durationText(raw) {
+    if (raw === null || raw === undefined || raw === '' || !Number.isFinite(Number(raw))) return '';
+    const total = Math.max(0, Math.round(Number(raw)));
+    if (total === 0) return 'Dưới 1 phút';
+    const d = Math.floor(total / 1440);
+    const h = Math.floor((total % 1440) / 60);
+    const m = total % 60;
+    return [d ? d + ' ngày' : '', h ? h + ' giờ' : '', m ? m + ' phút' : '']
+      .filter(Boolean).join(' ');
+  }
+
   function cellValue(row, key) {
+    if (key === 'minutes' || key === 'silence_minutes') return durationText(row[key]);
     if (key === 'completion_rate') {
       const calls = Number(row.total_calls);
       const done = Number(row.completed_calls);
