@@ -148,28 +148,12 @@
       (Date.parse(b[field] || '') || 0) - (Date.parse(a[field] || '') || 0));
   }
 
-  function safeCsvText(value) {
-    let text = String(value).replace(/[\r\n\u2028\u2029]+/g, ' ').trim();
-    if (/^[\s\u0000-\u001f]*[=+@-]/.test(text)) text = "'" + text;
-    return '"' + text.replace(/"/g, '""') + '"';
-  }
-
-  function csvCell(value) {
-    if (value === null || value === undefined || value === '') return '""';
-    if (value instanceof Date) return safeCsvText(localizedTime(value));
-    if (typeof value === 'number') {
-      return Number.isFinite(value) ? String(value).replace('.', ',') : '""';
-    }
-    return safeCsvText(value);
-  }
-
-  function filename(kind, format, days) {
+  function filename(kind, days) {
     const dt = new Date();
-    const stamp = [
-      new Intl.DateTimeFormat('en-CA', {timeZone: TZ, year:'numeric',month:'2-digit',day:'2-digit'}).format(dt),
-      ('0' + dt.getHours()).slice(-2) + ('0' + dt.getMinutes()).slice(-2)
-    ].join('_');
-    return 'NurseCall_' + REPORTS[kind].slug + '_' + days + 'ngay_' + stamp + '.' + format;
+    const parts = new Intl.DateTimeFormat('en-GB', {timeZone: TZ, year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(dt);
+    const part = type => parts.find(p=>p.type===type)?.value || '00';
+    const stamp = part('year')+part('month')+part('day')+'_'+part('hour')+part('minute');
+    return 'NurseCall_' + REPORTS[kind].slug + '_' + days + 'ngay_' + stamp + '.xlsx';
   }
 
   function download(bytes, mime, name) {
@@ -182,14 +166,6 @@
     link.click();
     link.remove();
     setTimeout(() => URL.revokeObjectURL(url), 15000);
-  }
-
-  function csvContent(kind, rows) {
-    const columns = REPORTS[kind].columns;
-    const header = columns.map(c => safeCsvText(c[1])).join(';');
-    const entries = orderedRows(kind, rows).map(row =>
-      columns.map(c => csvCell(cellValue(row, c[0]))).join(';'));
-    return '\uFEFFsep=;\r\n' + [header, ...entries].join('\r\n') + '\r\n';
   }
 
   function xmlEscape(value) {
@@ -265,7 +241,7 @@
       ' activeCell="A10" sqref="A10"/></sheetView></sheetViews>' +
       '<sheetFormatPr defaultRowHeight="20"/><cols>' + widths + '</cols><sheetData>' +
       lines.join('') + '</sheetData><mergeCells count="3">' + merged +
-      '</mergeCells><autoFilter ref="A9:' + last + end + '"/>' +
+      '</mergeCells>' + (sorted.length ? '<autoFilter ref="A9:' + last + end + '"/>' : '') +
       '<printOptions horizontalCentered="0"/>' +
       '<pageMargins left="0.25" right="0.25" top="0.45" bottom="0.45" header="0.2" footer="0.2"/>' +
       '<pageSetup orientation="landscape" paperSize="9" fitToWidth="1"/>' +
@@ -343,6 +319,7 @@
       ['xl/workbook.xml', '<?xml version="1.0" encoding="UTF-8"?>' +
         '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"' +
         ' xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">' +
+        '<bookViews><workbookView activeTab="0" firstSheet="0"/></bookViews>' +
         '<sheets><sheet name="' + xmlEscape(title) + '" sheetId="1" r:id="rId1"/></sheets></workbook>'],
       ['xl/_rels/workbook.xml.rels', '<?xml version="1.0" encoding="UTF-8"?>' +
         '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
@@ -355,20 +332,15 @@
     return zipStored(files);
   }
 
-  function save(format, kind, rows, days) {
+  function save(kind, rows, days) {
     if (!REPORTS[kind]) throw new Error('Loại báo cáo không hợp lệ');
     if (!Array.isArray(rows)) throw new Error('Dữ liệu báo cáo không hợp lệ');
-    if (format === 'csv') {
-      download(csvContent(kind, rows), 'text/csv;charset=utf-8', filename(kind, 'csv', days));
-    } else if (format === 'xlsx') {
-      download(excelBytes(kind, rows, days),
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        filename(kind, 'xlsx', days));
-    } else {
-      throw new Error('Định dạng tệp không hợp lệ');
-    }
+    if (!Number.isInteger(days) || days < 1 || days > 366) throw new Error('Khoảng thời gian không hợp lệ');
+    const file = excelBytes(kind, rows, days);
+    download(file, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      filename(kind, days));
     return rows.length;
   }
 
-  root.NurseCallExport = Object.freeze({save, csvContent, excelBytes, reports: REPORTS});
+  root.NurseCallExport = Object.freeze({save, excelBytes, reports: REPORTS});
 })(window);
