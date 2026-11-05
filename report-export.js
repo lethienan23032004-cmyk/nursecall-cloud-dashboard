@@ -56,8 +56,7 @@
         ['device_id', 'Thiết bị', 28], ['kind', 'Loại thiết bị', 18],
         ['started_at', 'Bắt đầu', 23], ['ended_at', 'Khôi phục', 23],
         ['minutes', 'Thời lượng (phút)', 22],
-        ['outage_state', 'Tình trạng', 22],
-        ['source', 'Nguồn ghi nhận', 31]
+        ['outage_state', 'Tình trạng', 22]
       ]
     },
     calls: {
