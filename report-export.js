@@ -1,4 +1,4 @@
-/* NurseCall Cloud · Professional CSV / Excel export. No external dependencies. */
+/* NurseCall Cloud · Professional Excel XLSX export. No external dependencies. */
 (function (root) {
   'use strict';
 
