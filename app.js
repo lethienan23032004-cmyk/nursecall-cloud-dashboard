@@ -23,7 +23,7 @@ function render(data){const k=data.stats||{}, beds=data.beds||[],devs=data.devic
   $('nodeOnline').textContent=number(k.node_online);$('nodeOffline').textContent=number(k.node_offline);$('nodeUnknown').textContent=number(k.node_unknown);
   const pi=devs.find(d=>d.kind==='pi');const online=pi?.status==='online';const unknown=!pi?.last_seen_at;
   $('piState').textContent=unknown?'Chưa có heartbeat':online?'Đang kết nối':'Mất liên lạc Cloud';$('piDot').className='status-dot '+(unknown?'unknown':online?'':'bad');$('piLast').textContent=when(pi?.last_seen_at);$('piLost').textContent=mins(n(pi?.silence_seconds)/60);
-  $('lastSync').textContent='Dữ liệu Cloud · '+when(data.generated_at);$('footerSync').textContent='Cập nhật '+when(data.generated_at);$('dateLabel').textContent=`Trạm trung tam· ${S.days} ngày gần đây`;
+  $('lastSync').textContent='Dữ liệu Cloud · '+when(data.generated_at);$('footerSync').textContent='Cập nhật '+when(data.generated_at);$('dateLabel').textContent='Trạm y tá trung tâm';
   for(const [col,count] of [['Hr','hr_alert'],['Temp','temp_alert'],['Bp','bp_alert'],['Mode','mode_alert']]){$('count'+col).textContent=number(k[count]);$('bar'+col).style.width=`${Math.min(100,n(k[count])*100/Math.max(1,n(k.samples)))}%`;}
   renderBeds(beds);renderAbnormal(data.abnormal_recent||[]);renderOutages(data.outages||[],devs);
 }
