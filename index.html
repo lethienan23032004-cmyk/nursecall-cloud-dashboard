@@ -34,12 +34,21 @@
       <div class="top-actions">
         <div class="live-status" id="liveStatus"><span class="pulse"></span><span id="liveText">Đang kết nối</span></div>
         <select id="daysSelect" aria-label="Khoảng thời gian"><option value="7">7 ngày</option><option value="30" selected>30 ngày</option><option value="90">90 ngày</option><option value="365">12 tháng</option></select>
-        <div class="export-wrap"><button class="btn secondary" id="exportToggle" aria-expanded="false">Xuất CSV <span>⌄</span></button><div class="export-menu" id="exportMenu" hidden>
-          <button data-export="beds">Thống kê theo giường</button>
-          <button data-export="abnormal">Chỉ số bất thường</button>
-          <button data-export="outages">Thời gian gián đoạn</button>
-          <button data-export="calls">Chi tiết cuộc gọi</button>
-        </div></div>
+        <div class="export-wrap">
+          <button class="btn secondary" id="exportToggle" aria-expanded="false">Xuất báo cáo <span>⌄</span></button>
+          <div class="export-menu" id="exportMenu" hidden>
+            <div class="export-group-label">EXCEL · BÁO CÁO ĐỊNH DẠNG</div>
+            <button data-export="beds" data-format="xlsx">Thống kê theo giường</button>
+            <button data-export="abnormal" data-format="xlsx">Chỉ số bất thường</button>
+            <button data-export="outages" data-format="xlsx">Gián đoạn kết nối</button>
+            <button data-export="calls" data-format="xlsx">Chi tiết cuộc gọi</button>
+            <div class="export-group-label csv-group">CSV · DỮ LIỆU</div>
+            <button data-export="beds" data-format="csv">Theo giường (.csv)</button>
+            <button data-export="abnormal" data-format="csv">Chỉ số bất thường (.csv)</button>
+            <button data-export="outages" data-format="csv">Gián đoạn kết nối (.csv)</button>
+            <button data-export="calls" data-format="csv">Chi tiết cuộc gọi (.csv)</button>
+          </div>
+        </div>
         <button class="icon-button" id="refreshButton" title="Cập nhật dữ liệu">↻</button>
       </div>
     </header>
@@ -87,4 +96,4 @@
 </div>
 <div class="modal-cover" id="bedModal" hidden><div class="modal"><div class="modal-top"><div><h2 id="detailTitle">—</h2></div><button id="closeModal" class="icon-button" aria-label="Đóng">×</button></div><div id="detailBody"></div></div></div>
 <div class="toast" id="toast" hidden></div>
-<script src="./app.js" defer></script></body></html>
+<script src="./report-export.js" defer></script><script src="./app.js" defer></script></body></html>
