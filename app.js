@@ -36,20 +36,45 @@ function renderOutages(records,devs){const ongoing=devs.filter(d=>d.last_seen_at
  $('outageRows').innerHTML=rows.length?rows.map(x=>`<tr><td class="place">${x.kind==='pi'?'Raspberry Pi 4':escapeHtml(x.device_id)}</td><td>${when(x.started_at)}</td><td>${x.ended_at?when(x.ended_at):'<span class="count-red">Chưa khôi phục</span>'}</td><td class="num">${mins(x.minutes)}</td><td>${x.source==='ongoing'?'Đang mất heartbeat':x.source==='cloud_gap'?'Mất liên lạc Cloud':'Khoảng trống heartbeat'}</td></tr>`).join(''):`<tr><td colspan="5" class="empty">Chưa ghi nhận gián đoạn</td></tr>`;}
 function showBed(b){if(!b)return;$('detailTitle').textContent=`Phòng ${b.room} · Giường ${b.bed}`;const matches=(S.report.abnormal_recent||[]).filter(v=>String(v.floor)===String(b.floor)&&String(v.room)===String(b.room)&&String(v.bed)===String(b.bed));$('detailBody').innerHTML=`<div class="detail-grid">${[['Cuộc gọi',b.total_calls],['Khẩn cấp',b.emergency_calls],['Mẫu bất thường',b.abnormal_samples],['Mất heartbeat',mins(b.silence_minutes)],['Hoàn thành',b.completed_calls],['Tiếp nhận TB',secs(b.avg_accept_seconds)]].map(([a,v])=>`<div class="detail-box"><small>${escapeHtml(a)}</small><b>${escapeHtml(v??'—')}</b></div>`).join('')}</div><div class="detail-subhead">Trạng thái: ${statusLabel(b.node_status)}</div><div class="detail-subhead">Mẫu bất thường gần đây</div>${matches.length?matches.slice(0,8).map(v=>`<div class="detail-incident"><span>${when(v.measured_at)}</span><span>${v.bpm??'—'} bpm · ${v.temp_c??'—'}°C · ${v.bp_sys??'—'}/${v.bp_dia??'—'}</span></div>`).join(''):`<div class="detail-incident">Không có mẫu gần đây</div>`}`;$('bedModal').hidden=false;}
 function closeBed(){$('bedModal').hidden=true;}
-const CSV_SPECS={
- beds:{name:'TongHop_TheoGiuong',columns:[['floor','Tầng'],['room','Phòng'],['bed','Giường'],['total_calls','Tổng cuộc gọi'],['emergency_calls','Khẩn cấp'],['completed_calls','Hoàn thành'],['avg_accept_seconds','Tiếp nhận TB (giây)'],['total_samples','Tổng mẫu đo'],['abnormal_samples','Mẫu bất thường'],['silence_minutes','Mất heartbeat (phút)'],['node_status','Trạng thái node'],['last_seen_at','Heartbeat cuối']]},
- abnormal:{name:'ChiSo_BatThuong',columns:[['measured_at','Thời điểm đo'],['floor','Tầng'],['room','Phòng'],['bed','Giường'],['device_uid','UID node'],['bpm','Nhịp tim (bpm)'],['temp_c','Nhiệt độ (°C)'],['bp_sys','Huyết áp tâm thu (mmHg)'],['bp_dia','Huyết áp tâm trương (mmHg)'],['mode','Chế độ'],['hr_alert','Bất thường nhịp tim'],['temp_alert','Bất thường nhiệt độ'],['bp_alert','Bất thường huyết áp']]},
- outages:{name:'GianDoan_KetNoi',columns:[['device_id','Thiết bị'],['kind','Loại'],['started_at','Bắt đầu'],['ended_at','Khôi phục'],['minutes','Thời lượng (phút)'],['source','Nguồn xác định']]},
- calls:{name:'LichSu_CuocGoi',columns:[['floor','Tầng'],['room','Phòng'],['bed','Giường'],['call_type','Loại cuộc gọi'],['status','Trạng thái'],['called_at','Bắt đầu'],['accepted_at','Tiếp nhận'],['arrived_at','Đã đến'],['completed_at','Hoàn thành'],['cancelled_at','Hủy'],['accept_seconds','Tiếp nhận (giây)']]},
-};
-function csvCell(v){if(v===null||v===undefined)return '';let s=typeof v==='boolean'?(v?'Có':'Không'):String(v);if(/^[=+\-@\t\r]/.test(s)&&typeof v!=='number')s="'"+s;return '"'+s.replaceAll('"','""')+'"';}
-function exportCSV(kind,rows){const spec=CSV_SPECS[kind];const mapTime=new Set(['last_seen_at','measured_at','started_at','ended_at','called_at','accepted_at','arrived_at','completed_at','cancelled_at']);const lines=[spec.columns.map(x=>csvCell(x[1])).join(';'),...rows.map(row=>spec.columns.map(([field])=>csvCell(mapTime.has(field)&&row[field]?when(row[field]):row[field])).join(';'))];const csv='\uFEFFsep=;\r\n'+lines.join('\r\n')+'\r\n';const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`NurseCall_${spec.name}_${new Date().toISOString().slice(0,10)}.csv`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
-async function startExport(kind){$('exportMenu').hidden=true;if(!S.report){announce('Chưa có báo cáo để xuất');return;}try{$('exportToggle').disabled=true;let rows=[];if(kind==='beds')rows=S.report.beds||[];else{for(let offset=0;offset<20000;offset+=400){const batch=await rpc('nc_cloud_export',{p_site:S.cfg.site,p_days:S.days,p_kind:kind,p_limit:400,p_offset:offset});if(!Array.isArray(batch))throw new Error('Định dạng dữ liệu CSV không hợp lệ');rows.push(...batch);if(batch.length<400)break;}if(rows.length>=20000)announce('Đã xuất 20.000 dòng đầu tiên. Thu hẹp khoảng thời gian để xuất đủ dữ liệu.');}exportCSV(kind,rows);announce(`Đã xuất ${number(rows.length)} dòng · ${CSV_SPECS[kind].name}`);}catch(e){announce('Không thể xuất CSV: '+e.message);}finally{$('exportToggle').disabled=false;}}
+async function startExport(kind,format='xlsx'){
+  $('exportMenu').hidden=true;
+  if(!S.report){announce('Chưa có dữ liệu để xuất báo cáo');return;}
+  if(!window.NurseCallExport){announce('Chưa tải được chức năng xuất báo cáo');return;}
+  const button=$('exportToggle');
+  const oldLabel=button.innerHTML;
+  button.disabled=true;
+  button.textContent='Đang xuất...';
+  try{
+    let rows=[];
+    let isLimited=false;
+    if(kind==='beds'){
+      rows=S.report.beds||[];
+    }else{
+      for(let offset=0;offset<20000;offset+=400){
+        const batch=await rpc('nc_cloud_export',{
+          p_site:S.cfg.site,p_days:S.days,p_kind:kind,p_limit:400,p_offset:offset
+        });
+        if(!Array.isArray(batch))throw new Error('Dữ liệu báo cáo không hợp lệ');
+        rows.push(...batch);
+        if(batch.length<400)break;
+        if(offset===19600)isLimited=true;
+      }
+    }
+    NurseCallExport.save(format,kind,rows,S.days);
+    if(isLimited)announce('Đã xuất 20.000 bản ghi đầu tiên. Thu hẹp khoảng thời gian để lấy toàn bộ.');
+    else announce('Đã xuất '+number(rows.length)+' bản ghi · '+format.toUpperCase());
+  }catch(e){
+    announce('Lỗi xuất báo cáo: '+e.message);
+  }finally{
+    button.disabled=false;
+    button.innerHTML=oldLabel;
+  }
+}
 async function setup(){try{const cfg=await raw('./config.json',{cache:'no-store'});if(!/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(cfg.url)||!cfg.key||!cfg.site)throw new Error('Thiếu cấu hình Cloud');S.cfg=cfg;}catch(e){$('loginScreen').hidden=false;$('authError').hidden=false;$('authError').textContent='Website chưa được cấu hình Supabase. '+e.message;return;}
  $('authForm').addEventListener('submit',async e=>{e.preventDefault();$('authError').hidden=true;$('loginButton').disabled=true;try{await login($('authEmail').value.trim(),$('authPassword').value,false);}catch(ex){$('authError').textContent=ex.message;$('authError').hidden=false;}finally{$('loginButton').disabled=false;}});
  $('signupButton').addEventListener('click',async()=>{if(!$('authForm').reportValidity())return;$('authError').hidden=true;try{await login($('authEmail').value.trim(),$('authPassword').value,true);}catch(e){$('authError').textContent=e.message;$('authError').hidden=false;}});
  $('signoutButton').addEventListener('click',async()=>{try{if(S.session?.access_token)await raw(S.cfg.url+'/auth/v1/logout',{method:'POST',headers:{apikey:S.cfg.key,Authorization:`Bearer ${S.session.access_token}`}});}catch{}saveSession(null);S.report=null;$('shell').hidden=true;$('loginScreen').hidden=false;});
- $('daysSelect').addEventListener('change',()=>{S.days=Number($('daysSelect').value);load();});$('refreshButton').addEventListener('click',load);$('bedSearch').addEventListener('input',()=>{if(S.report)renderBeds(S.report.beds||[]);});$('exportToggle').addEventListener('click',()=>{$('exportMenu').hidden=!$('exportMenu').hidden;});document.querySelectorAll('[data-export]').forEach(x=>x.addEventListener('click',()=>startExport(x.dataset.export)));document.addEventListener('click',e=>{if(!e.target.closest('.export-wrap'))$('exportMenu').hidden=true;});$('closeModal').addEventListener('click',closeBed);$('bedModal').addEventListener('click',e=>{if(e.target===$('bedModal'))closeBed();});document.addEventListener('keydown',e=>{if(e.key==='Escape')closeBed();});document.addEventListener('visibilitychange',()=>{if(!document.hidden&&S.session)load();});
+ $('daysSelect').addEventListener('change',()=>{S.days=Number($('daysSelect').value);load();});$('refreshButton').addEventListener('click',load);$('bedSearch').addEventListener('input',()=>{if(S.report)renderBeds(S.report.beds||[]);});$('exportToggle').addEventListener('click',()=>{$('exportMenu').hidden=!$('exportMenu').hidden;});document.querySelectorAll('[data-export]').forEach(x=>x.addEventListener('click',()=>startExport(x.dataset.export,x.dataset.format||'xlsx')));document.addEventListener('click',e=>{if(!e.target.closest('.export-wrap'))$('exportMenu').hidden=true;});$('closeModal').addEventListener('click',closeBed);$('bedModal').addEventListener('click',e=>{if(e.target===$('bedModal'))closeBed();});document.addEventListener('keydown',e=>{if(e.key==='Escape')closeBed();});document.addEventListener('visibilitychange',()=>{if(!document.hidden&&S.session)load();});
  try{S.session=JSON.parse(localStorage.getItem('nc_cloud_session_v5')||'null');}catch{saveSession(null);}
  if(S.session?.access_token){try{await bootAuthenticated();}catch{saveSession(null);$('loginScreen').hidden=false;}}else $('loginScreen').hidden=false;
  S.timer=setInterval(()=>{if(S.session&&!document.hidden)load();},20000);
