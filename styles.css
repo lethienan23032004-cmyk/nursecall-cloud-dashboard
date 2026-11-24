@@ -46,3 +46,77 @@ tbody tr:hover { background: #f5faf8; }
 /* Báo cáo Excel / CSV */
 .export-menu{min-width:256px;max-height:min(70vh,560px);overflow-y:auto}
 .export-menu button{font-size:12px;padding:9px 12px}
+
+
+/* NURSECALL_CLOUD_COMPACT_20261125: compact responsive layout */
+html,body{width:100%;max-width:100%;overflow-x:hidden}
+.shell{min-height:100dvh}
+.sidebar{width:194px;padding:17px 10px 12px}
+.sidebar .brand{padding:0 6px 20px;gap:8px;font-size:14px}
+.sidebar .nav{padding:9px 10px;font-size:12px;margin:1px 0;gap:9px}
+.sidebar .aside-foot{padding:10px 8px;font-size:11px}
+.topbar{padding:13px 19px;gap:10px;flex-wrap:wrap}
+.heading h1{font-size:clamp(19px,2vw,23px)}
+.subtitle,.mini-caption,.stat-sub,.login p{display:none!important}
+.top-actions{gap:6px}.top-actions .btn{padding:8px 10px}
+.content{width:100%;max-width:1700px;padding:14px 18px}
+.content section{margin-bottom:15px}
+.section-bar{margin-bottom:9px;gap:9px}
+.section-bar h2{font-size:15px}
+.stat-grid{gap:10px;grid-template-columns:repeat(4,minmax(0,1fr))}
+.stat{padding:12px 14px;min-height:88px}
+.stat-head{font-size:11px}.stat-icon{min-width:25px;height:25px}
+.stat strong{margin:8px 0 0;font-size:clamp(23px,2.3vw,29px)}
+.connections,.two-col{gap:10px}
+.pi-panel{padding:12px 14px}.node-panel{padding:13px 8px}
+.node-stat strong{font-size:24px}
+.panel{padding:12px 14px}.panel .section-bar{margin-bottom:13px}
+.metric-list{gap:12px}.metric-row{margin-bottom:4px}
+.table-card{max-width:100%}.scroll-table{overflow-x:auto;-webkit-overflow-scrolling:touch}
+th{padding:10px 11px;font-size:10px}
+td{padding:10px 11px;font-size:11px}
+.table-footer{padding:8px 12px}
+.event-list{max-height:210px}
+.outage-section{margin-top:14px}
+.footer{padding:10px 0}
+.login{min-height:100dvh;padding:12px}
+.login-card{width:min(100%,390px);padding:clamp(18px,4vw,26px);max-height:calc(100dvh - 24px);overflow-y:auto}
+.login h1{font-size:22px;margin:15px 0 6px}
+.login label{margin:9px 0 4px}
+.login input{padding:10px 12px}
+.login .btn.block{margin-top:15px}
+.modal-cover{padding:10px}.modal{max-height:calc(100dvh - 20px);padding:16px}
+@media(max-width:1050px){
+.sidebar{width:164px}
+.stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.topbar{padding:12px 15px}
+.content{padding:12px 14px}
+}
+@media(max-width:760px){
+.shell{display:block}
+.sidebar{display:flex;position:sticky;top:0;z-index:30;flex-direction:row;flex-wrap:wrap;align-items:center;gap:4px;width:100%;height:auto;max-height:none;padding:7px 10px}
+.sidebar .brand{width:100%;padding:0 0 3px;font-size:13px}
+.sidebar .brand-mark{width:26px;height:26px;font-size:21px}
+.sidebar .nav{display:inline-flex;padding:5px 7px;margin:0;font-size:10px;gap:0}
+.sidebar .nav-icon,.sidebar .aside-foot{display:none}
+.topbar{display:flex;flex-direction:column;align-items:stretch;padding:12px 12px 9px}
+.top-actions{margin-top:0;gap:6px}
+.top-actions .live-status{padding:6px 8px;font-size:10px}
+.top-actions select,.top-actions .btn{font-size:11px;padding:6px 8px;min-height:33px}
+.icon-button{height:33px;min-width:33px}
+.content{padding:11px 10px}
+.stat-grid{gap:7px}
+.stat{padding:10px;min-height:75px}
+.stat strong{font-size:25px;margin:5px 0 0}
+.stat-head{font-size:10px}
+.connections,.two-col{grid-template-columns:1fr}
+.section-bar h2{font-size:14px}
+.node-panel{min-height:0}
+.search input{min-width:0;width:min(40vw,150px)}
+}
+@media(max-width:390px){
+.sidebar .nav{font-size:9px;padding:5px}
+.stat-head{font-size:9px}
+.stat-icon{display:none}
+.login-card{padding:18px}
+}
